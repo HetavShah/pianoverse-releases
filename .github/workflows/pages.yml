@@ -1,5 +1,6 @@
 # pianoverse.in: website/site, built from website/index.src.html on every push to main and served by GitHub Pages
-# (Settings > Pages > Source: GitHub Actions; custom domain pianoverse.in).
+# (Settings > Pages > Source: GitHub Actions; custom domain pianoverse.in). Only main is ever published: other
+# branches don't trigger it, and a manual run from another branch does nothing.
 name: Website
 
 on:
@@ -19,6 +20,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
