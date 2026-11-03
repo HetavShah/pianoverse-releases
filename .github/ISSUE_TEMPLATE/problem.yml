@@ -1,0 +1,21 @@
+name: Something went wrong
+description: Pianoverse did something it shouldn't, or failed.
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Settings menu (the gear, top right) shows it.
+      placeholder: v0.2.120
+  - type: textarea
+    id: log
+    attributes:
+      label: Log (optional)
+      description: Settings menu > Show logs opens the folder. Drag today's app-….log here. It has no video, sound or project in it.
