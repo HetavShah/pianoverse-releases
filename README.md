@@ -30,7 +30,7 @@ This repository holds the releases, the website and the files the app downloads.
 | | |
 |---|---|
 | [Releases](https://github.com/HetavShah/pianoverse-releases/releases) | Every version, with its installer and the update file the app checks (`latest.json`) |
-| `website/` | [pianoverse.in](https://pianoverse.in): `index.src.html` is the page, `site/` what is served. After editing, `python3 website/build.py page`; pushing to `main` publishes it |
+| `index.html`, `assets/`, … | [pianoverse.in](https://pianoverse.in), served from `main` as it is. The page's source is `website/index.src.html`: after editing it, run `python3 website/build.py page` and commit |
 | `assets/piano/` | The grand piano the app plays your notes on, downloaded once when first picked |
 
 ## Credits

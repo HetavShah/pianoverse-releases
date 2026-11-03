@@ -1,9 +1,10 @@
-"""Build pianoverse.in into website/site/ (committed; GitHub Pages serves it, see .github/workflows/pages.yml).
+"""Build pianoverse.in. GitHub Pages serves this repository's main branch as it is, from its root: index.html,
+404.html, the icons and assets/ there are the site (assets/piano is the app's download, served along with it).
 
-The page is index.src.html with the looks, the notes and the waveform filled in. Editing the words or the layout
-only needs the last step:
+The page is index.src.html with the looks, the notes and the waveform filled in. After editing the words or the
+layout, run the last step and commit the new index.html:
 
-  python3 website/build.py page      # site/index.html (needs nothing but Python)
+  python3 website/build.py page      # index.html at the root (needs nothing but Python)
 
 Every picture, video and sound on it comes from the app itself, rendered from the sample take in the app's
 source, checked out next to this repository (../pianoverse) or wherever PIANOVERSE_APP says. Run these from that
@@ -13,9 +14,9 @@ checkout (the frames go to website/.work/, which is not committed):
   npx vite --port 5174                                 # the app's source, for the piano audio
   python3 website/build.py render    # frames from the app (slow without a graphics card)
   python3 website/build.py media     # videos, stills, audio, fonts
-  python3 website/build.py page      # site/index.html
-  (cd website/site && python3 -m http.server 8090)
-  node website/tools/og.mjs website/site                  # share card and touch icon
+  python3 website/build.py page      # index.html
+  python3 -m http.server 8090       # from the repository's root, to look at it
+  node website/tools/og.mjs .                  # share card and touch icon
   node website/tools/shoot.mjs <dir>                      # full-page screenshots at 1440 and 390
 """
 import glob, json, os, shutil, subprocess, sys
@@ -24,7 +25,8 @@ W = os.path.dirname(os.path.abspath(__file__))
 # the app's source (the sample take, its node_modules for the fonts, its test tools)
 ROOT = os.environ.get('PIANOVERSE_APP') or os.path.join(os.path.dirname(os.path.dirname(W)), 'pianoverse')
 WORK = f'{W}/.work'
-S = f'{W}/site'
+# the site is the repository's root
+S = os.path.dirname(W)
 A = f'{S}/assets'
 SRC = f'{ROOT}/samples/interstellar-take1.mp4'
 PROJ = f'{ROOT}/samples/interstellar-take1.pvproj.json'
@@ -122,7 +124,7 @@ def media():
     d = json.load(open(PROJ))
     notes = [[round(n['s'] - FROM, 3), round(n['e'] - FROM, 3), n['p'], round(n['v'], 2)] for n in d['notes'] if n['e'] > FROM and n['s'] < FROM + 20]
     json.dump(notes, open(f'{W}/notes.json', 'w'), separators=(',', ':'))
-    for f in ('favicon.svg', 'CNAME', '404.html'):
+    for f in ('favicon.svg', '404.html'):
         shutil.copy(f'{W}/static/{f}', f'{S}/{f}')
     open(f'{S}/.nojekyll', 'w').close()
 
