@@ -21,7 +21,7 @@ for (const [w, h] of sizes) {
     const W = document.documentElement.clientWidth, out = [];
     for (const el of document.querySelectorAll('body *')) {
       const r = el.getBoundingClientRect();
-      if (r.width && r.right > W + 1 && !el.closest('.looks, .shots, .lane-label') && getComputedStyle(el).position !== 'fixed') out.push(el.tagName + '.' + el.className + ' ' + Math.round(r.right));
+      if (r.width && r.right > W + 1 && !el.closest('.swipe, .fan, .picker') && getComputedStyle(el).position !== 'fixed') out.push(el.tagName + '.' + el.className + ' ' + Math.round(r.right));
     }
     return { scrollW: document.documentElement.scrollWidth, W, out: out.slice(0, 12) };
   });

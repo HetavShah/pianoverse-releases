@@ -1,11 +1,11 @@
 <p align="center">
-  <a href="https://pianoverse.in"><img src="docs/hero.jpg" alt="Pianoverse: a piano performance video with falling notes, a saber and particles drawn onto the keys" width="760"></a>
+  <a href="https://pianoverse.in"><img src="docs/hero.jpg" alt="Pianoverse: notes falling onto a piano keyboard, with light and sparks where they land" width="760"></a>
 </p>
 
 <h1 align="center">Pianoverse</h1>
 
 <p align="center">
-  Falling notes, light and sound for your piano videos. Free, for Windows, no login.<br>
+  The video editor for pianists: editing tools shaped around the piano. Free, for Windows, no login.<br>
   <a href="https://github.com/HetavShah/pianoverse-releases/releases/latest"><b>Download for Windows</b></a> · <a href="https://pianoverse.in"><b>pianoverse.in</b></a>
 </p>
 
