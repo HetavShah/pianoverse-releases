@@ -170,7 +170,10 @@ if (JOB === 'video') {
   await at(31); await page.waitForTimeout(900); await screen('camera');
   // the sound: the grand piano mixed in, evened out for social media
   await page.evaluate(() => { const p = window.pianoverseProject; window.pianoverseSetProject({ ...p, sound: { ...p.sound, source: 'both', blend: 0.6, even: true, room: 'hall', hall: 0.35 } }); });
-  await page.evaluate(() => window.pianoverseGoStep('sound')); await page.waitForTimeout(6000);
+  await page.evaluate(() => window.pianoverseGoStep('sound')); await page.waitForTimeout(3000);
+  // the piano's waveform is drawn in the background: wait for it
+  await page.waitForFunction(() => !/Drawing the piano|Getting the piano ready/.test(document.body.innerText), null, { timeout: 240000 }).catch(() => console.log('the waveform is still drawing'));
+  await page.waitForTimeout(1500);
   await screen('sound');
   await page.evaluate(() => window.pianoverseGoStep('export')); await page.waitForTimeout(2500);
   await screen('export');
