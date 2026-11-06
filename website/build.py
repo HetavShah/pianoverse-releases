@@ -7,9 +7,10 @@ last step and commit the new index.html:
   python3 website/build.py page      # index.html at the root (needs nothing but Python)
 
 Every picture and clip on it is made by the app itself: the effects from a MIDI file on the app's drawn keyboard
-(no video), the app's screens from the sample take in the app's source, checked out next to this repository
-(../pianoverse) or wherever PIANOVERSE_APP says. Run these from that checkout (the frames go to website/.work/,
-which is not committed):
+(no video); the app's screens, the hero's loops and the before and after from a real take in website/source (a
+landscape video and its project: the keyboard marked, the notes found in its sound). The app's source is checked out
+next to this repository (../pianoverse) or wherever PIANOVERSE_APP says. Run these from that checkout (the frames go
+to website/.work/, which is not committed):
 
   npx vite build && npx vite preview --port 4173      # the app, for rendering frames
   python3 website/build.py render    # frames and screens from the app (slow without a graphics card)
@@ -31,18 +32,32 @@ RELEASES = 'https://github.com/HetavShah/pianoverse-releases/releases'
 FPS, FADE = 24, 1
 
 LOOKS = [('gold', 'Gold Leaf'), ('lagoon', 'Lagoon'), ('ember', 'Ember'), ('neon', 'Neon Night'), ('aurora', 'Aurora'), ('swan', 'Swan')]
-PICKER = ['gold', 'lagoon', 'ember', 'neon']  # the hero's loops
+# the hero: the editor in these looks (must match tools/render.mjs), the cursor picking them in turn
+TAKE_LOOKS = [('gold', 'Gold Leaf'), ('ocean', 'Ocean Gem'), ('synth', 'Synthwave')]
+TAKE_T = 7  # the moment of the take the screens and stills show
 NOTES = [('glass', 'Glass'), ('gem', 'Gem'), ('hollow', 'Hollow'), ('soft', 'Soft glow')]
 PARTICLES = [('fountain', 'Fountain'), ('vortex', 'Vortex'), ('explode', 'Explode'), ('streaks', 'Streaks')]
 # the app's screens (1440x900): the whole window for wide screens, and on phones the part that matters
 SCREENS = {
     'import': ('Pianoverse importing a video, its MIDI file and its sound', (0, 50, 700, 650)),
-    'sync': ('Pianoverse lining the notes up with the keys in the video', (150, 90, 950, 890)),
-    'picture': ('Pianoverse adding falling notes and light to a piano video', (230, 90, 1030, 890)),
-    'camera': ('Pianoverse moving the camera with the hands', (250, 90, 1050, 890)),
-    'sound': ('Pianoverse mixing a grand piano under the recording', (0, 90, 820, 910)),
+    'sync': ('Pianoverse lining the notes up with the keys in the video', (120, 96, 1100, 831)),
+    'looks-gold': ('Pianoverse adding falling notes and light to a piano video, in the Gold Leaf look', (520, 96, 1440, 786)),
+    'looks-ocean': ('The same take in the Ocean Gem look', (520, 96, 1440, 786)),
+    'looks-synth': ('The same take in the Synthwave look', (520, 96, 1440, 786)),
+    'p-notes': ('The Notes panel: shapes and textures', None),
+    'p-saber': ('The Saber panel: colour, size and glow', None),
+    'p-particles': ('The Particles panel: sparks on every note', None),
+    'p-lighting': ('The Note light panel: the notes light the keys', None),
+    'camera': ('Pianoverse moving the camera with the hands', None),
+    'sound': ('Pianoverse mixing a grand piano under the recording', None),
     'export': ('Pianoverse exporting the video', (0, 50, 760, 810)),
 }
+# customize: the editor stays and the panel changes as you scroll (on phones: the right of the preview and the panel)
+PIN = [('looks-gold', 'Looks', 'One click, a whole style.'), ('p-notes', 'Notes', 'Shapes and textures.'),
+       ('p-saber', 'Saber', 'Light where the notes land.'), ('p-particles', 'Particles', 'A burst on every note.'),
+       ('p-lighting', 'Light', 'The notes light your keys.'), ('camera', 'Camera', 'Follows your hands.')]
+PIN_BOX = {'camera': (440, 96, 1440, 640)}
+PIN_BOX_DEFAULT = (520, 96, 1440, 640)
 
 
 def sh(*a, **k):
@@ -97,9 +112,8 @@ def media():
     shutil.copy(f'{nm}/@fontsource/syncopate/files/syncopate-latin-700-normal.woff2', f'{A}/fonts/syncopate-700.woff2')
     shutil.copy(f'{nm}/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-normal.woff2', f'{A}/fonts/cormorant-600.woff2')
     shutil.copy(f'{nm}/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-italic.woff2', f'{A}/fonts/cormorant-600-italic.woff2')
-    for id in PICKER:
-        loop(f'hero-{id}', f'{A}/hero/{id}')
-    loop('hero-short', f'{A}/hero/short')
+    for id, _ in TAKE_LOOKS:
+        loop(f'take-{id}', f'{A}/hero/{id}')
     loop('saber', f'{A}/saber/gold')
     for id, _ in PARTICLES:
         loop(f'part-{id}', f'{A}/particles/{id}')
@@ -109,14 +123,25 @@ def media():
         save(Image.open(f'{WORK}/notes-{id}.jpg'), f'{A}/notes/{id}.jpg')
     for id in ('flame', 'electric'):
         save(Image.open(f'{WORK}/saber-{id}.jpg'), f'{A}/saber/{id}.jpg', (640, 360))
-    for id in ('landscape', 'square', 'vertical'):
-        save(Image.open(f'{WORK}/shape-{id}.jpg'), f'{A}/shapes/{id}.jpg')
     save(Image.open(f'{WORK}/title-open.jpg'), f'{A}/titles/open.jpg')
     save(Image.open(f'{WORK}/title-end.jpg'), f'{A}/titles/end.jpg')
     for id, (_, box) in SCREENS.items():
         im = Image.open(f'{WORK}/ui-{id}.png')
         save(im, f'{A}/screens/{id}.jpg', q=86)
-        save(im.crop(box), f'{A}/screens/{id}-m.jpg', q=86)
+        if box:
+            save(im.crop(box), f'{A}/screens/{id}-m.jpg', q=86)
+    for id, _, _ in PIN:
+        save(Image.open(f'{WORK}/ui-{id}.png').crop(PIN_BOX.get(id, PIN_BOX_DEFAULT)), f'{A}/screens/{id}-p.jpg', q=86)
+    # the sound tab down to its waveforms
+    save(Image.open(f'{WORK}/ui-sound.png').crop((0, 96, 1440, 640)), f'{A}/screens/sound-top.jpg', q=86)
+    # the take: finished, as filmed, and the effects alone (the transparent export)
+    fin = Image.open(f'{WORK}/take-final.jpg')
+    save(fin, f'{A}/take/final.jpg', q=84)
+    save(fin, f'{A}/take/final-s.jpg', (960, 540))
+    sh('ffmpeg', '-v', 'error', '-y', '-ss', str(TAKE_T), '-i', f'{W}/source/take.mp4', '-frames:v', '1', '-q:v', '2', f'{WORK}/take-raw.jpg')
+    save(Image.open(f'{WORK}/take-raw.jpg'), f'{A}/take/raw.jpg', q=84)
+    Image.open(f'{WORK}/take-fx.png').resize((960, 540), Image.LANCZOS).save(f'{A}/take/fx.png', optimize=True)
+    shutil.copy(f'{WORK}/ui-rects.json', f'{A}/take/rects.json')
     # the README's picture
     save(Image.open(f'{WORK}/look-gold.jpg'), f'{S}/docs/hero.jpg', (1280, 720))
     for f in ('favicon.svg', '404.html'):
@@ -137,18 +162,32 @@ def figures(items, folder, video=False):
 
 
 def page():
+    import json
     html = open(f'{W}/index.src.html').read()
-    names = dict(LOOKS)
-    picker = '\n'.join(
-        f'        <button type="button" aria-pressed="{str(i == 0).lower()}" data-name="{names[id]}" data-src="assets/hero/{id}.mp4" '
-        f'data-poster="assets/hero/{id}.jpg"><img src="assets/looks/{id}.jpg" alt="{names[id]}"><span>{names[id]}</span></button>'
-        for i, id in enumerate(PICKER))
-    html = (html.replace('%%RELEASES_ALL%%', RELEASES).replace('%%RELEASES%%', f'{RELEASES}/latest').replace('%%PICKER%%', picker)
+    # the hero: the editor in each look, the preview playing the take, a cursor that clicks the next look's card
+    rects = json.load(open(f'{A}/take/rects.json'))
+    pct = lambda v, n: f'{v / n * 100:.3f}%'
+    x, y, w, h = rects['preview']
+    tour = []
+    for i, (id, name) in enumerate(TAKE_LOOKS):
+        cx, cy, cw, ch = rects['card:' + name]
+        tour.append(f'        <img class="scr{" on" if i == 0 else ""}" src="assets/screens/looks-{id}.jpg" alt="{"Pianoverse, the video editor, adding falling notes and light to a piano video" if i == 0 else ""}" '
+                    f'width="1440" height="900" data-src="assets/hero/{id}.mp4" data-poster="assets/hero/{id}.jpg" data-cx="{pct(cx + cw * .55, 1440)}" data-cy="{pct(cy + ch * .45, 900)}"'
+                    f'{" fetchpriority=\"high\"" if i == 0 else " loading=\"lazy\""}>')
+    tour.append(f'        <video src="assets/hero/gold.mp4" poster="assets/hero/gold.jpg" autoplay muted loop playsinline '
+                f'style="left:{pct(x, 1440)};top:{pct(y, 900)};width:{pct(w, 1440)};height:{pct(h, 900)}" aria-label="The preview: the take with notes falling onto the keys"></video>')
+    tour.append('        <span class="cursor" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 2l7 19 2.5-8L21 10z" fill="#fff" stroke="#000" stroke-width="1.4" stroke-linejoin="round"/></svg></span>')
+    pin_list = '\n'.join(f'          <li data-cap="{cap}"{" class=\"on\"" if i == 0 else ""}><b>{i + 1:02d}</b>{name}<i></i></li>' for i, (id, name, cap) in enumerate(PIN))
+    pin_shots = '\n'.join(f'          <picture><source media="(max-width: 700px)" srcset="assets/screens/{id}-p.jpg">'
+                          f'<img{" class=\"on\"" if i == 0 else ""} src="assets/screens/{id}.jpg" alt="{SCREENS[id][0]}" loading="lazy" width="1440" height="900"></picture>'
+                          for i, (id, name, cap) in enumerate(PIN))
+    html = (html.replace('%%RELEASES_ALL%%', RELEASES).replace('%%RELEASES%%', f'{RELEASES}/latest').replace('%%TOUR%%', '\n'.join(tour))
+            .replace('%%PIN_LIST%%', pin_list).replace('%%PIN_SCREENS%%', pin_shots)
             .replace('%%LOOKS%%', figures(LOOKS, 'looks')).replace('%%NOTES%%', figures(NOTES, 'notes'))
             .replace('%%PARTICLES%%', figures(PARTICLES, 'particles', video=True)))
-    for id, (alt, _) in SCREENS.items():
-        html = html.replace(f'%%SCREEN:{id}%%', f'<picture><source media="(max-width: 700px)" srcset="assets/screens/{id}-m.jpg">'
-                                                f'<img src="assets/screens/{id}.jpg" alt="{alt}" loading="lazy" width="1440" height="900"></picture>')
+    for id, (alt, box) in SCREENS.items():
+        src = f'<source media="(max-width: 700px)" srcset="assets/screens/{id}-m.jpg">' if box else ''
+        html = html.replace(f'%%SCREEN:{id}%%', f'<picture>{src}<img src="assets/screens/{id}.jpg" alt="{alt}" loading="lazy" width="1440" height="900"></picture>')
     assert '%%' not in html, html[html.index('%%') - 40:html.index('%%') + 40]
     open(f'{S}/index.html', 'w').write(html)
 
