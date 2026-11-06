@@ -1,6 +1,6 @@
 // Every picture and clip on pianoverse.in, straight from the app's renderer (needs the app's vite preview on :4173).
 //   node render.mjs <work dir> drawn   the effects: a MIDI file on the drawn keyboard (no video), stills and loops
-//   node render.mjs <work dir> video   the app's own screens, editing a real take (website/source: a landscape video and
+//   node render.mjs <work dir> video   the app's own screens, editing a real take (assets/sample: a landscape video and
 //                                      its project, the notes found in its sound), its loops and stills
 // A loop's frames go to <work>/<name>/00000.jpg…; a still to <work>/<name>.jpg; a screen to <work>/ui-<name>.png.
 // ONLY=name,name renders just those.
@@ -154,8 +154,8 @@ if (JOB === 'drawn') {
 
 if (JOB === 'video') {
   // a real take: a landscape video, its project (the keyboard marked, the notes found in its sound)
-  const SRC = process.env.TAKE ?? `${SITE}website/source`;
-  await page.setInputFiles('.row-actions input[type=file]', `${SRC}/take.pvproj.json`); await page.waitForTimeout(800);
+  const SRC = process.env.TAKE ?? `${SITE}assets/sample`;
+  await page.setInputFiles('.row-actions input[type=file]', `${SRC}/take.json`); await page.waitForTimeout(800);
   await page.setInputFiles('.file-card .actions input[type=file]', `${SRC}/take.mp4`); await page.waitForTimeout(4000);
   const T = 7;
   const at = async (t) => { await page.evaluate((t) => window.pianoverseSeek(t), t); await page.waitForTimeout(900); };

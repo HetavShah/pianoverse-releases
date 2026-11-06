@@ -1,5 +1,6 @@
 """Build pianoverse.in. GitHub Pages serves this repository's main branch as it is, from its root: index.html,
-404.html, the icons and assets/ there are the site (assets/piano is the app's download: never touch it).
+404.html, the icons and assets/ there are the site (assets/piano and assets/sample are the app's downloads: never
+touch them; the app checks their checksums).
 
 The page is index.src.html with the galleries and links filled in. After editing the words or the layout, run the
 last step and commit the new index.html:
@@ -7,8 +8,9 @@ last step and commit the new index.html:
   python3 website/build.py page      # index.html at the root (needs nothing but Python)
 
 Every picture and clip on it is made by the app itself: the effects from a MIDI file on the app's drawn keyboard
-(no video); the app's screens, the hero's loops and the before and after from a real take in website/source (a
-landscape video and its project: the keyboard marked, the notes found in its sound). The app's source is checked out
+(no video); the app's screens, the hero's loops and the before and after from a real take in assets/sample (a
+landscape video and its project: the keyboard marked, the notes found in its sound; the same files the app downloads as
+its sample take, so they live in assets/sample, kept like assets/piano). The app's source is checked out
 next to this repository (../pianoverse) or wherever PIANOVERSE_APP says. Run these from that checkout (the frames go
 to website/.work/, which is not committed):
 
@@ -102,9 +104,9 @@ def loop(name, out):
 
 def media():
     from PIL import Image
-    # the old page's files go; the piano the app downloads stays
+    # the old page's files go; the piano and the sample take the app downloads stay
     for p in glob.glob(f'{A}/*'):
-        if os.path.basename(p) != 'piano':
+        if os.path.basename(p) not in ('piano', 'sample'):
             shutil.rmtree(p) if os.path.isdir(p) else os.remove(p)
     os.makedirs(f'{A}/fonts', exist_ok=True)
     nm = f'{ROOT}/node_modules'
@@ -138,7 +140,7 @@ def media():
     fin = Image.open(f'{WORK}/take-final.jpg')
     save(fin, f'{A}/take/final.jpg', q=84)
     save(fin, f'{A}/take/final-s.jpg', (960, 540))
-    sh('ffmpeg', '-v', 'error', '-y', '-ss', str(TAKE_T), '-i', f'{W}/source/take.mp4', '-frames:v', '1', '-q:v', '2', f'{WORK}/take-raw.jpg')
+    sh('ffmpeg', '-v', 'error', '-y', '-ss', str(TAKE_T), '-i', f'{A}/sample/take.mp4', '-frames:v', '1', '-q:v', '2', f'{WORK}/take-raw.jpg')
     save(Image.open(f'{WORK}/take-raw.jpg'), f'{A}/take/raw.jpg', q=84)
     Image.open(f'{WORK}/take-fx.png').resize((960, 540), Image.LANCZOS).save(f'{A}/take/fx.png', optimize=True)
     shutil.copy(f'{WORK}/ui-rects.json', f'{A}/take/rects.json')
